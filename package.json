@@ -1,0 +1,16 @@
+{
+  "name": "db-conformance-ts",
+  "private": true,
+  "type": "module",
+  "description": "The TypeScript runner of db-conformance (ce-db-ts)",
+  "scripts": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@ce-net/db": "git+https://github.com/Leif-Rydenfalk/ce-db-ts.git#5420e3587860f21cce02bfab1d27be22bc23ad60"
+  },
+  "devDependencies": {
+    "@types/node": "18.19.130",
+    "typescript": "5.6.3"
+  }
+}

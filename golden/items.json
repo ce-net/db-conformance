@@ -1,0 +1,5 @@
+{
+  "_doc": "D1: the exact stored text of conf_schema::golden_a(\"g-a\") and golden_b(\"g-b\"), written by hand from the encoding rules (DB-SDK-DESIGN.md 1.3); every runner's encoder must produce these bytes.",
+  "a": "{\"_v\":2,\"at\":1731576000000,\"big\":\"18446744073709551615\",\"bin\":\"A4\",\"delta\":\"-9223372036854775808\",\"flag\":true,\"id\":\"g-a\",\"name\":\"Grüße \\\"q\\\"\\n\\u0001\",\"qty\":7,\"ratio\":1.5,\"raw\":\"0001feff\",\"tags\":[\"x\",\"y\"]}",
+  "b": "{\"_v\":2,\"at\":0,\"big\":\"0\",\"bin\":\"B\",\"delta\":\"0\",\"flag\":false,\"id\":\"g-b\",\"name\":\"\",\"note\":\"n\",\"qty\":0,\"ratio\":100,\"raw\":\"\",\"tags\":[]}"
+}

@@ -1,0 +1,8 @@
+[package]
+name = "db-conformance"
+version = "0.1.0"
+edition = "2021"
+description = "The db-conformance driver: dev stores, each runner's scenarios, D8 across languages both ways, one matrix; exits 1 on any FAIL"
+
+[dependencies]
+ce-db-dev = { workspace = true }

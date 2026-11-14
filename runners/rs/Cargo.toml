@@ -1,0 +1,11 @@
+[package]
+name = "conf-rs"
+version = "0.1.0"
+edition = "2021"
+description = "db-conformance runner for ce-db-rs: drives only the public ce-db API, prints CONF <id> PASS|FAIL"
+
+[dependencies]
+ce-db = { workspace = true }
+ce-db-core = { workspace = true }
+conf-schema = { path = "../../schema" }
+serde_json = "1"

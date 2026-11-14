@@ -1,0 +1,8 @@
+[workspace]
+resolver = "2"
+members = ["schema", "runners/rs", "driver"]
+
+[workspace.dependencies]
+ce-db = { git = "https://github.com/Leif-Rydenfalk/ce-db-rs", rev = "0cc326e0fcdb" }
+ce-db-core = { git = "https://github.com/Leif-Rydenfalk/ce-db-rs", rev = "0cc326e0fcdb" }
+ce-db-dev = { git = "https://github.com/Leif-Rydenfalk/ce-db-rs", rev = "0cc326e0fcdb" }

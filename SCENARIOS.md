@@ -5,8 +5,10 @@ scenario: `CONF <id> PASS` or `CONF <id> FAIL <why>`. Source of the design: `rep
 section 8. The records are `schema/src/lib.rs` (`Item`, and `ItemNext`, the same collection one version later); other
 languages use the types `ce-wire-gen --records` generates from that file (`sdk/ts/db-conformance.ts`).
 
-App `db-conformance`, collection `items`. Grants: `--cap` holds `state.dbconformance.*` (read, write, admin),
-`--cap-ro` holds `state.dbconformance.items.read` only. Every key carries the run tag, so a run never meets another.
+App `db-conformance`, collections `items` and `notes`. Grants: `--cap` holds `state.dbconformance.*` (read, write,
+admin), `--cap-ro` holds `state.dbconformance.items.read` only, `--cap-items` holds `state.dbconformance.items.read`
+and `.write` only, `--cap-other` holds every right of another app (`parts-demo`). Every key carries the run tag, so a
+run never meets another.
 
 | id | checks |
 |---|---|
@@ -20,6 +22,9 @@ App `db-conformance`, collection `items`. Grants: `--cap` holds `state.dbconform
 | D8 cross-language | language A's watcher on one key prints `READY` after `Synced`; language B inserts `golden_a(key)`; A sees `Added` with the equal typed value and get returns it. Run both ways for every pair |
 | D9 too-large | an item whose encoding exceeds 2,000 bytes fails with `TooLarge { bytes > 2000, limit: 2000 }` before any call, and get finds nothing |
 | D10 refused | with the read-only grant, insert fails with `Refused { need: "state.dbconformance.items.write" }`, and nothing is written |
+| D11 reconnect | a prefix watch has seen b and c and `Synced`; the store is killed (a dev store in a child process, never a production replica); a second instance over the same data file takes the changes the watcher misses (insert a, update b's `qty` 1 to 2, remove c) and stops; the store restarts on the first address. The watch's link reports `Offline`, then `Resyncing`, then exactly `Added(a)`, `Changed(b)`, `Removed(c)` (no duplicate, nothing before `Resyncing`), then `Live` |
+| D12 collection-scope | the `items`-only grant inserts into `items`; on `notes` insert fails with `Refused { need: "state.dbconformance.notes.write" }` and get with `Refused { need: "state.dbconformance.notes.read" }`; nothing lands in `notes` |
+| D13 wrong-app | another app's grant (`--cap-other`) is refused on `db-conformance` with `Refused` naming a `state.dbconformance.` right (at open, the schema check or insert), and nothing is written |
 
 Known encoding limits, not in the golden values: non-integral floats below 1e-6 or at or above 1e21 (Rust's ryu and
 JavaScript write them differently); JSON numbers above 2^53 in fields a JavaScript reader does not know (they are

@@ -2,10 +2,11 @@
 // sdk/ts/db-conformance.ts (ce-wire-gen --records from schema/src/lib.rs).
 //   node dist/runners/ts/run.js run --store ADDR --cap CAP --cap-ro CAP [--tag T]
 //   node dist/runners/ts/run.js d8-watch|d8-write --store ADDR --cap CAP --key K
+//   node dist/runners/ts/run.js d11-watch|d11-write --store ADDR --cap CAP --tag T
 import * as fs from 'node:fs';
 import { isDeepStrictEqual } from 'node:util';
-import { open, encode, decode, DbError, type Db, type Change } from '@ce-net/db';
-import { items, itemNext, ItemMeta, type Item } from '../../sdk/ts/db-conformance.js';
+import { open, encode, decode, DbError, type Db, type Change, type Link } from '@ce-net/db';
+import { items, itemNext, notes, ItemMeta, type Item } from '../../sdk/ts/db-conformance.js';
 
 const GOLDEN = JSON.parse(fs.readFileSync(new URL('../../../golden/items.json', import.meta.url), 'utf8')) as Record<string, string>;
 
@@ -45,6 +46,10 @@ interface Ctx {
   store: string;
   cap: string;
   capRo: string;
+  /** read and write on `items` only (D12) */
+  capItems: string;
+  /** every right of another app (D13) */
+  capOther: string;
   tag: string;
 }
 const k = (c: Ctx, s: string) => `${s}-${c.tag}`;
@@ -200,6 +205,96 @@ async function d10(c: Ctx): Promise<void> {
   ensure((await items(c.db).get(k(c, 'd10'))) === undefined, 'nothing written');
 }
 
+// D12: a grant on collection `items` is refused on collection `notes` of the same app, and still works on `items`.
+async function d12(c: Ctx): Promise<void> {
+  await notes(c.db).get(k(c, 'd12-register')); // the full grant registers `notes`
+  const db = await open('db-conformance', { store: c.store, cap: c.capItems });
+  await items(db).insert(item(k(c, 'd12'), 'd12', 1));
+  const n = notes(db);
+  await fails(n.insert({ id: k(c, 'd12'), text: 'x' }), (e) => e.info.kind === 'Refused' && e.info.need === 'state.dbconformance.notes.write', 'insert on notes: Refused naming state.dbconformance.notes.write');
+  await fails(n.get(k(c, 'd12')), (e) => e.info.kind === 'Refused' && e.info.need === 'state.dbconformance.notes.read', 'get on notes: Refused naming state.dbconformance.notes.read');
+  ensure((await notes(c.db).get(k(c, 'd12'))) === undefined, 'nothing written to notes');
+  db.close();
+}
+
+// D13: a grant of another app is refused on this app, naming a right of this app, and nothing is written.
+async function d13(c: Ctx): Promise<void> {
+  const want = (e: DbError) => e.info.kind === 'Refused' && e.info.need.startsWith('state.dbconformance.');
+  let db: Db | null = null;
+  try {
+    db = await open('db-conformance', { store: c.store, cap: c.capOther });
+  } catch (e) {
+    if (e instanceof DbError && want(e)) return;
+    throw new Error(`open: got ${kind(e)}`);
+  }
+  await fails(items(db).insert(item(k(c, 'd13'), 'd13', 1)), want, "another app's grant: Refused naming a state.dbconformance right");
+  ensure((await items(c.db).get(k(c, 'd13'))) === undefined, 'nothing written');
+  db.close();
+}
+
+// D11, the watcher: b and c exist and are seen, then READY; the driver kills the store, writes elsewhere, and brings
+// it back. The watch must report offline, then resyncing, then deliver exactly the missed changes, then be live.
+async function d11Watch(db: Db, tag: string): Promise<void> {
+  const it = items(db);
+  const p = `d11-${tag}/`;
+  const [a, b, c] = [`${p}a`, `${p}b`, `${p}c`];
+  await it.insert(item(b, 'd11', 1));
+  await it.insert(item(c, 'd11', 1));
+  const w = await it.prefix(p).watch();
+  const seen: string[] = [];
+  let liveAgain = false;
+  const stop = await it.onLink((l: Link) => {
+    if (seen[seen.length - 1] !== l) seen.push(l);
+    if (l === 'live' && seen.includes('resyncing')) liveAgain = true;
+  });
+  const first: Change<Item>[] = [];
+  for (;;) {
+    const ch = await w.next(5000);
+    if (!ch) throw new Error('no synced within 5 s');
+    if (ch.kind === 'synced') break;
+    first.push(ch);
+  }
+  ensure(first.length === 2, `before synced: ${kind(first)}`);
+  console.log('READY');
+  const t0 = Date.now();
+  const got: Change<Item>[] = [];
+  while (Date.now() - t0 < 40000 && !(got.length >= 3 && liveAgain)) {
+    const ch = await w.next(50);
+    if (!ch) continue;
+    seen.push(`change ${ch.kind} ${ch.kind === 'removed' ? ch.key : ch.kind === 'synced' ? '' : ch.doc.id}`);
+    got.push(ch);
+  }
+  stop();
+  console.error(`d11: ${seen.join(' -> ')}`);
+  const off = seen.indexOf('offline');
+  ensure(off >= 0, `never offline: ${seen}`);
+  const re = seen.indexOf('resyncing', off);
+  ensure(re > off, `never resyncing after offline: ${seen}`);
+  const firstChange = seen.findIndex((s) => s.startsWith('change'));
+  ensure(firstChange > re, `a change arrived before resyncing: ${seen}`);
+  ensure(liveAgain, `not live again: ${seen}`);
+  const ok = [false, false, false];
+  for (const ch of got) {
+    if (ch.kind === 'added' && isDeepStrictEqual(ch.doc, item(a, 'd11', 1))) ok[0] = true;
+    else if (ch.kind === 'changed' && ch.old.qty === 1 && isDeepStrictEqual(ch.doc, { ...item(b, 'd11', 1), qty: 2 })) ok[1] = true;
+    else if (ch.kind === 'removed' && ch.key === c) ok[2] = true;
+    else throw new Error(`an unexpected change ${kind(ch)}`);
+  }
+  ensure(ok.every(Boolean) && got.length === 3, `missed changes: added a ${ok[0]}, changed b ${ok[1]}, removed c ${ok[2]}; ${got.length} changes`);
+  ensure((await w.next(300)) === undefined, 'no duplicate after');
+  w.close();
+}
+
+async function d11Write(db: Db, tag: string): Promise<void> {
+  const it = items(db);
+  const p = `d11-${tag}/`;
+  await it.insert(item(`${p}a`, 'd11', 1));
+  await it.update(`${p}b`, (x) => {
+    x.qty = 2;
+  });
+  await it.remove(`${p}c`);
+}
+
 async function main(): Promise<void> {
   const mode = process.argv[2] ?? '';
   const store = arg('--store', '127.0.0.1:7811');
@@ -210,6 +305,22 @@ async function main(): Promise<void> {
   } catch (e) {
     console.log(`CONF OPEN FAIL ${kind(e)}`);
     process.exit(1);
+  }
+  if (mode === 'd11-watch' || mode === 'd11-write') {
+    const tag = arg('--tag', 'd11');
+    try {
+      if (mode === 'd11-watch') {
+        await d11Watch(db, tag);
+        console.log('CONF D11 PASS');
+      } else {
+        await d11Write(db, tag);
+        console.log('WROTE d11');
+      }
+      process.exit(0);
+    } catch (e) {
+      console.log(`CONF D11 FAIL ${mode === 'd11-write' ? 'the writer: ' : ''}${(e as Error).message}`);
+      process.exit(mode === 'd11-write' ? 1 : 0);
+    }
   }
   if (mode === 'd8-write' || mode === 'd8-watch') {
     const key = arg('--key', 'd8');
@@ -240,8 +351,8 @@ async function main(): Promise<void> {
     }
     process.exit(0);
   }
-  const c: Ctx = { db, store, cap, capRo: arg('--cap-ro', 'ro'), tag: arg('--tag', String(process.pid)) };
-  const all: [string, (c: Ctx) => Promise<void>][] = [['D1', d1], ['D2', d2], ['D3', d3], ['D4', d4], ['D5', d5], ['D6', d6], ['D7', d7], ['D9', d9], ['D10', d10]];
+  const c: Ctx = { db, store, cap, capRo: arg('--cap-ro', 'ro'), capItems: arg('--cap-items', 'items'), capOther: arg('--cap-other', 'other'), tag: arg('--tag', String(process.pid)) };
+  const all: [string, (c: Ctx) => Promise<void>][] = [['D1', d1], ['D2', d2], ['D3', d3], ['D4', d4], ['D5', d5], ['D6', d6], ['D7', d7], ['D9', d9], ['D10', d10], ['D12', d12], ['D13', d13]];
   let fail = false;
   for (const [id, f] of all) {
     const t0 = Date.now();

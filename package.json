@@ -7,7 +7,7 @@
     "build": "tsc -p tsconfig.json"
   },
   "dependencies": {
-    "@ce-net/db": "git+https://github.com/Leif-Rydenfalk/ce-db-ts.git#5420e3587860f21cce02bfab1d27be22bc23ad60"
+    "@ce-net/db": "git+https://github.com/Leif-Rydenfalk/ce-db-ts.git#662859d21080f28367e30a8cced9708131b89552"
   },
   "devDependencies": {
     "@types/node": "18.19.130",

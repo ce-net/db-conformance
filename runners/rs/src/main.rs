@@ -1,10 +1,14 @@
 //! The ce-db-rs runner of db-conformance (SCENARIOS.md). Drives only ce-db's public API.
 //!
-//! `conf-rs run --store ADDR --cap CAP --cap-ro CAP [--tag T]`: D1..D7, D9, D10, one `CONF <id> PASS|FAIL <why>` each.
+//! `conf-rs run --store ADDR --cap CAP --cap-ro CAP --cap-items CAP --cap-other CAP [--tag T]`: D1..D7, D9, D10, D12,
+//!   D13, one `CONF <id> PASS|FAIL <why>` each.
 //! `conf-rs d8-watch --store ADDR --cap CAP --key K`: prints `READY` once watching, then `CONF D8 PASS|FAIL`.
 //! `conf-rs d8-write --store ADDR --cap CAP --key K`: writes golden_a(K) and exits.
+//! `conf-rs d11-watch --store ADDR --cap CAP --tag T`: writes b and c, watches the prefix, prints `READY`, then
+//!   `CONF D11 PASS|FAIL` once the store went away, came back and the missed changes arrived.
+//! `conf-rs d11-write --store ADDR --cap CAP --tag T`: the changes the watcher misses (insert a, update b, remove c).
 use ce_db::prelude::*;
-use ce_db::{Change, Collection, Db};
+use ce_db::{Change, Collection, Db, Link};
 use conf_schema::*;
 use std::collections::HashSet;
 use std::time::{Duration, Instant};
@@ -30,6 +34,10 @@ struct Ctx {
     store: String,
     cap: String,
     cap_ro: String,
+    /// read and write on `items` only (D12)
+    cap_items: String,
+    /// every right of another app (D13)
+    cap_other: String,
     tag: String,
 }
 
@@ -212,6 +220,126 @@ fn d10(c: &Ctx) -> R {
     ensure(c.items()?.get(c.k("d10")).map_err(e2s)?.is_none(), "nothing written")
 }
 
+/// D12: a grant on collection `items` is refused on collection `notes` of the same app, and still works on `items`.
+fn d12(c: &Ctx) -> R {
+    c.db.collection::<Note>().map_err(e2s)?; // the full grant registers `notes`
+    let db = ce_db::open_at("db-conformance", &c.store, &c.cap_items).map_err(e2s)?;
+    let items = db.collection::<Item>().map_err(e2s)?;
+    items.insert(&item(&c.k("d12"), "d12", 1)).map_err(|e| format!("the items grant on items: {e:?}"))?;
+    let notes = db.collection::<Note>().map_err(e2s)?;
+    match notes.insert(&Note { id: c.k("d12"), text: "x".into() }) {
+        Err(DbError::Refused { need }) => ensure(need == "state.dbconformance.notes.write", format!("insert names {need}"))?,
+        o => return Err(format!("insert on notes: want Refused, got {o:?}")),
+    }
+    match notes.get(c.k("d12")) {
+        Err(DbError::Refused { need }) => ensure(need == "state.dbconformance.notes.read", format!("get names {need}"))?,
+        o => return Err(format!("get on notes: want Refused, got {o:?}")),
+    }
+    ensure(c.db.collection::<Note>().map_err(e2s)?.get(c.k("d12")).map_err(e2s)?.is_none(), "nothing written to notes")
+}
+
+/// D13: a grant of another app is refused on this app, naming a right of this app, and nothing is written.
+fn d13(c: &Ctx) -> R {
+    let refused = |e: DbError| match e {
+        DbError::Refused { need } if need.starts_with("state.dbconformance.") => Ok(need),
+        o => Err(format!("want Refused naming a state.dbconformance right, got {o:?}")),
+    };
+    let need = match ce_db::open_at("db-conformance", &c.store, &c.cap_other) {
+        Err(e) => refused(e)?,
+        Ok(db) => match db.collection::<Item>() {
+            Err(e) => refused(e)?,
+            Ok(items) => match items.insert(&item(&c.k("d13"), "d13", 1)) {
+                Err(e) => refused(e)?,
+                Ok(_) => return Err("another app's grant wrote to db-conformance".into()),
+            },
+        },
+    };
+    ensure(c.items()?.get(c.k("d13")).map_err(e2s)?.is_none(), format!("refused ({need}) and nothing written"))
+}
+
+/// D11, the watcher: b and c exist and are seen, then READY; the driver kills the store, writes elsewhere, and brings
+/// it back. The watch must report Offline, then Resyncing, then deliver exactly the missed changes, then be Live.
+fn d11_watch(db: &Db, tag: &str) -> R {
+    let items = db.collection::<Item>().map_err(e2s)?;
+    let p = format!("d11-{tag}/");
+    let (a, b, c) = (format!("{p}a"), format!("{p}b"), format!("{p}c"));
+    items.insert(&item(&b, "d11", 1)).map_err(e2s)?;
+    items.insert(&item(&c, "d11", 1)).map_err(e2s)?;
+    let mut w = items.prefix(p.clone()).watch().map_err(e2s)?;
+    let links = w.link_changes();
+    let mut first = Vec::new();
+    loop {
+        match w.next_timeout(Duration::from_secs(5)).ok_or("no Synced within 5 s")?.map_err(e2s)? {
+            Change::Synced => break,
+            ch => first.push(ch),
+        }
+    }
+    ensure(first.len() == 2, format!("before Synced: {first:?}"))?;
+    println!("READY");
+    let t = Instant::now();
+    let mut seen: Vec<String> = Vec::new(); // the link states and changes, in order
+    let mut got: Vec<Change<Item>> = Vec::new();
+    let mut live_again = false;
+    // link transitions are sent before the changes they cause, so drain them before recording each change
+    let drain = |seen: &mut Vec<String>, live_again: &mut bool| {
+        for l in links.try_iter() {
+            let name = match &l {
+                Link::Offline(_) => "offline",
+                Link::Resyncing => "resyncing",
+                Link::Live => "live",
+                Link::Connecting => "connecting",
+            };
+            if seen.last().map(String::as_str) != Some(name) {
+                seen.push(name.into());
+            }
+            *live_again |= l == Link::Live && seen.iter().any(|s| s == "resyncing");
+        }
+    };
+    while t.elapsed() < Duration::from_secs(40) {
+        drain(&mut seen, &mut live_again);
+        if let Some(ch) = w.next_timeout(Duration::from_millis(50)) {
+            let ch = ch.map_err(e2s)?;
+            drain(&mut seen, &mut live_again);
+            seen.push(format!("change {}", match &ch {
+                Change::Added(x) => format!("added {}", x.id),
+                Change::Changed { new, .. } => format!("changed {}", new.id),
+                Change::Removed(k) => format!("removed {k}"),
+                Change::Synced => "synced".into(),
+            }));
+            got.push(ch);
+        }
+        if got.len() >= 3 && live_again {
+            break;
+        }
+    }
+    eprintln!("d11: {}", seen.join(" -> "));
+    let off = seen.iter().position(|s| s == "offline").ok_or(format!("never Offline: {seen:?}"))?;
+    let re = seen.iter().skip(off).position(|s| s == "resyncing").map(|i| i + off).ok_or(format!("never Resyncing after Offline: {seen:?}"))?;
+    let first_change = seen.iter().position(|s| s.starts_with("change")).ok_or(format!("no change delivered: {seen:?}"))?;
+    ensure(first_change > re, format!("a change arrived before Resyncing: {seen:?}"))?;
+    ensure(live_again, format!("not Live again: {seen:?}"))?;
+    let want_b = Item { qty: 2, ..item(&b, "d11", 1) };
+    let mut ok = [false; 3];
+    for ch in &got {
+        match ch {
+            Change::Added(x) if *x == item(&a, "d11", 1) => ok[0] = true,
+            Change::Changed { old, new } if old.qty == 1 && *new == want_b => ok[1] = true,
+            Change::Removed(k) if *k == c => ok[2] = true,
+            o => return Err(format!("an unexpected change {o:?}")),
+        }
+    }
+    ensure(ok == [true; 3] && got.len() == 3, format!("missed changes: added a {}, changed b {}, removed c {}; {} changes", ok[0], ok[1], ok[2], got.len()))?;
+    ensure(w.next_timeout(Duration::from_millis(300)).is_none(), "no duplicate after")
+}
+
+fn d11_write(db: &Db, tag: &str) -> R {
+    let items = db.collection::<Item>().map_err(e2s)?;
+    let p = format!("d11-{tag}/");
+    items.insert(&item(&format!("{p}a"), "d11", 1)).map_err(e2s)?;
+    items.update(format!("{p}b"), |x| x.qty = 2).map_err(e2s)?;
+    items.remove(format!("{p}c")).map_err(e2s)
+}
+
 fn arg(a: &[String], name: &str) -> Option<String> {
     a.iter().position(|x| x == name).and_then(|i| a.get(i + 1)).cloned()
 }
@@ -228,6 +356,20 @@ fn main() {
         }
     };
     let mode = a.get(1).cloned().unwrap_or_default();
+    if mode == "d11-watch" || mode == "d11-write" {
+        let tag = arg(&a, "--tag").unwrap_or_else(|| "d11".into());
+        let r = if mode == "d11-watch" { d11_watch(&db, &tag) } else { d11_write(&db, &tag) };
+        match (mode.as_str(), r) {
+            ("d11-watch", Ok(())) => println!("CONF D11 PASS"),
+            ("d11-watch", Err(e)) => println!("CONF D11 FAIL {e}"),
+            (_, Ok(())) => println!("WROTE d11"),
+            (_, Err(e)) => {
+                println!("CONF D11 FAIL the writer: {e}");
+                std::process::exit(1)
+            }
+        }
+        return;
+    }
     if mode == "d8-write" || mode == "d8-watch" {
         let key = arg(&a, "--key").unwrap_or_else(|| "d8".into());
         let items = match db.collection::<Item>() {
@@ -261,8 +403,16 @@ fn main() {
         return;
     }
     let tag = arg(&a, "--tag").unwrap_or_else(|| format!("{}", std::process::id()));
-    let c = Ctx { db, store, cap, cap_ro: arg(&a, "--cap-ro").unwrap_or_else(|| "ro".into()), tag };
-    let all: [(&str, fn(&Ctx) -> R); 9] = [("D1", d1), ("D2", d2), ("D3", d3), ("D4", d4), ("D5", d5), ("D6", d6), ("D7", d7), ("D9", d9), ("D10", d10)];
+    let c = Ctx {
+        db,
+        store,
+        cap,
+        cap_ro: arg(&a, "--cap-ro").unwrap_or_else(|| "ro".into()),
+        cap_items: arg(&a, "--cap-items").unwrap_or_else(|| "items".into()),
+        cap_other: arg(&a, "--cap-other").unwrap_or_else(|| "other".into()),
+        tag,
+    };
+    let all: [(&str, fn(&Ctx) -> R); 11] = [("D1", d1), ("D2", d2), ("D3", d3), ("D4", d4), ("D5", d5), ("D6", d6), ("D7", d7), ("D9", d9), ("D10", d10), ("D12", d12), ("D13", d13)];
     let mut fail = false;
     for (id, f) in all {
         let t = Instant::now();

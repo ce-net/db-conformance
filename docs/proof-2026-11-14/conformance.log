@@ -1,0 +1,48 @@
+== rs runner, store 127.0.0.1:44833
+    CONF D1 PASS (0 ms)
+    CONF D2 PASS (7 ms)
+    CONF D3 PASS (5 ms)
+    CONF D4 PASS (14 ms)
+    CONF D5 PASS (19 ms)
+    CONF D6 PASS (1244 ms)
+    CONF D7 PASS (317 ms)
+    CONF D9 PASS (3 ms)
+    CONF D10 PASS (8 ms)
+    CONF D12 PASS (12 ms)
+    CONF D13 PASS (5 ms)
+== ts runner, store 127.0.0.1:43885
+    CONF D1 PASS (3 ms)
+    CONF D2 PASS (20 ms)
+    CONF D3 PASS (11 ms)
+    CONF D4 PASS (25 ms)
+    CONF D5 PASS (43 ms)
+    CONF D6 PASS (1431 ms)
+    CONF D7 PASS (317 ms)
+    CONF D9 PASS (2 ms)
+    CONF D10 PASS (6 ms)
+    CONF D12 PASS (15 ms)
+    CONF D13 PASS (8 ms)
+== D11 rs: the store killed mid-watch and restarted (a dev store in a child process, never --store)
+    d11: killed the store at 127.0.0.1:41141 mid-watch
+    d11: wrote the missed changes through a second instance at 127.0.0.1:40343, stopped it
+    d11: restarted the store at 127.0.0.1:41141 on the same data
+d11: connecting -> offline -> resyncing -> change removed d11-rs1a1d98f9aea/c -> change added d11-rs1a1d98f9aea/a -> change changed d11-rs1a1d98f9aea/b -> live
+    CONF D11 PASS
+== D11 ts: the store killed mid-watch and restarted (a dev store in a child process, never --store)
+    d11: killed the store at 127.0.0.1:37255 mid-watch
+    d11: wrote the missed changes through a second instance at 127.0.0.1:44577, stopped it
+    d11: restarted the store at 127.0.0.1:37255 on the same data
+d11: live -> offline -> resyncing -> live -> change removed d11-ts1a1d98f9aea/c -> change added d11-ts1a1d98f9aea/a -> change changed d11-ts1a1d98f9aea/b
+    CONF D11 PASS
+== D8 across languages, store 127.0.0.1:44001
+d8: seen 12 ms after READY
+    rs writes, ts watches: CONF D8 PASS
+d8: seen 83 ms after READY
+    ts writes, rs watches: CONF D8 PASS
+
+== matrix
+       D1   D2   D3   D4   D5   D6   D7   D8   D9   D10  D11  D12  D13  
+rs     PASS PASS PASS PASS PASS PASS PASS PASS PASS PASS PASS PASS PASS 
+ts     PASS PASS PASS PASS PASS PASS PASS PASS PASS PASS PASS PASS PASS 
+
+26 of 26 PASS

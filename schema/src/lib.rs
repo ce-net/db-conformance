@@ -77,3 +77,13 @@ pub fn golden_b(id: &str) -> Item {
 pub fn item(id: &str, bin: &str, qty: u32) -> Item {
     Item { id: id.into(), name: format!("item {id}"), bin: bin.into(), qty, big: 1, delta: -1, ratio: 0.25, flag: false, tags: vec![], raw: Hex(vec![]), at: Millis(1), note: None }
 }
+
+/// A note: the app's second collection, so a grant on `items` can be shown refused on `notes` (D12).
+#[derive(Record, Clone, Debug, PartialEq)]
+#[db(app = "db-conformance", collection = "notes", version = 1)]
+pub struct Note {
+    #[db(key)]
+    pub id: String,
+    #[db(max = 200)]
+    pub text: String,
+}

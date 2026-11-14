@@ -438,3 +438,62 @@ export function itemNext(db: Db): ItemNextCollection {
     byQty: (r: Range<number>) => c.indexRange('qty', r),
   });
 }
+
+/** A note: the app's second collection, so a grant on `items` can be shown refused on `notes` (D12). */
+export interface Note {
+  id: string;
+  text: string;
+}
+export type NoteNew = Note;
+export const NoteMeta: RecordMeta = {
+  "app": "db-conformance",
+  "collection": "notes",
+  "consistency": "lww",
+  "doc": "A note: the app's second collection, so a grant on `items` can be shown refused on `notes` (D12).",
+  "fields": [
+    {
+      "default": null,
+      "doc": "",
+      "index": null,
+      "key": true,
+      "max": null,
+      "name": "id",
+      "secret": false,
+      "since": 1,
+      "ty": {
+        "kind": "string"
+      }
+    },
+    {
+      "default": null,
+      "doc": "",
+      "index": null,
+      "key": false,
+      "max": 200,
+      "name": "text",
+      "secret": false,
+      "since": 1,
+      "ty": {
+        "kind": "string"
+      }
+    }
+  ],
+  "hash_keys": false,
+  "key": "id",
+  "max_value": 2000,
+  "mirror_limit": 5000,
+  "per_person": false,
+  "replicas": [],
+  "type": "Note",
+  "version": 1
+};
+/** `db-conformance/notes` with its declared indexes. */
+export interface NoteCollection extends Collection<Note, NoteNew> {
+}
+/** The typed `notes` collection of `db` (opened with `open("db-conformance")`). */
+export function notes(db: Db): NoteCollection {
+  const c = db.collection<Note, NoteNew>(NoteMeta);
+  return Object.assign(c, {
+
+  });
+}

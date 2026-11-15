@@ -35,7 +35,7 @@ kept as JavaScript numbers).
 Two replicas of one typed collection keep working with no connection and merge when they meet. These scenarios are
 data, not calls to a store: each file in `golden/merge/` holds the scripted steps and the expected result, and a
 language's replica passes when it reproduces `expect` exactly. The reference replicas, Rust and TypeScript, are
-`db.replica` in `repo:demo-offline-merge` (`crates/db-replica`, `ts/src/replica.ts`); its CI runs every file here
+`db.replica` in [ce-net/demo-demo-offline-merge](https://github.com/ce-net/demo-demo-offline-merge) (`crates/db-replica`, `ts/src/replica.ts`); its CI runs every file here
 with two Rust processes, Rust and TypeScript processes, and two TypeScript processes, and all three must match.
 
 The record is `Part` (app `offline-merge`, collection `parts`, version 1): `id` (key, string, max 8), `name`

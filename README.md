@@ -31,7 +31,7 @@ ts     PASS PASS PASS PASS PASS PASS PASS PASS PASS PASS PASS PASS PASS
 | `SCENARIOS.md` | the contract, D1 to D13, and M1 to M5 (offline merge) |
 | `schema/` | `conf-schema`: the `#[derive(Record)]` source of the records and the golden values |
 | `golden/items.json` | the exact stored text of the two golden records (D1) |
-| `golden/merge/` | M1 to M5, offline merge: the scripted partitions and their expected state hash, rows, resolutions and refusals; run by `repo:demo-offline-merge` (Rust and TypeScript `db.replica`) |
+| `golden/merge/` | M1 to M5, offline merge: the scripted partitions and their expected state hash, rows, resolutions and refusals; run by [ce-net/demo-demo-offline-merge](https://github.com/ce-net/demo-demo-offline-merge) (Rust and TypeScript `db.replica`) |
 | `sdk/ts/db-conformance.ts`, `schemas/db-conformance.json` | generated: `ce-wire-gen --records schema/src/lib.rs --lang ts -o sdk/ts` and `--lang json -o schemas`; never edit |
 | `runners/rs/` | `conf-rs` on `ce-db` |
 | `runners/ts/run.ts` | the TypeScript runner on `@ce-net/db` |

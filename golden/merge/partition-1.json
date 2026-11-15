@@ -1,0 +1,288 @@
+{
+  "clock": {
+    "laptop": 1000,
+    "phone": 1000
+  },
+  "conformance": "db-conformance M1",
+  "expect": {
+    "gone": [
+      "p7"
+    ],
+    "hash": "2891c5de7869e5f598e0d782899e872088e715056a86efd101c04d14696ecf83",
+    "log_len": {
+      "laptop": 16,
+      "phone": 16
+    },
+    "plugs": [
+      {
+        "changed": {
+          "laptop": {
+            "added": [],
+            "changed": {
+              "p12": {
+                "name": "M6 bolt, zinc plated"
+              }
+            },
+            "removed": []
+          },
+          "phone": {
+            "added": [],
+            "changed": {
+              "p12": {
+                "qty": 40
+              }
+            },
+            "removed": [
+              "p7"
+            ]
+          }
+        },
+        "resolutions": [
+          {
+            "field": "name",
+            "key": "p12",
+            "lost": [],
+            "rule": "only one side wrote this field: both edits kept",
+            "winner": {
+              "by": "phone",
+              "hlc": "2003.0.phone",
+              "value": "M6 bolt, zinc plated"
+            }
+          },
+          {
+            "field": "qty",
+            "key": "p12",
+            "lost": [],
+            "rule": "only one side wrote this field: both edits kept",
+            "winner": {
+              "by": "laptop",
+              "hlc": "2000.0.laptop",
+              "value": 40
+            }
+          },
+          {
+            "field": null,
+            "key": "p7",
+            "lost": [
+              {
+                "by": "phone",
+                "fields": {
+                  "qty": 9
+                },
+                "hlc": "2020.0.phone"
+              }
+            ],
+            "rule": "delete beats edit",
+            "winner": {
+              "by": "laptop",
+              "hlc": "2010.0.laptop",
+              "value": "deleted"
+            }
+          }
+        ]
+      }
+    ],
+    "refused": [],
+    "rows": [
+      {
+        "_v": 1,
+        "bin": "A1",
+        "id": "p1",
+        "name": "M3 socket screw",
+        "qty": 200
+      },
+      {
+        "_v": 1,
+        "bin": "A3",
+        "id": "p10",
+        "name": "T-nut M5",
+        "qty": 120
+      },
+      {
+        "_v": 1,
+        "bin": "D2",
+        "id": "p11",
+        "name": "Shaft, 8 mm",
+        "qty": 5
+      },
+      {
+        "_v": 1,
+        "bin": "A4",
+        "id": "p12",
+        "name": "M6 bolt, zinc plated",
+        "qty": 40
+      },
+      {
+        "_v": 1,
+        "bin": "A1",
+        "id": "p2",
+        "name": "M3 hex nut",
+        "qty": 340
+      },
+      {
+        "_v": 1,
+        "bin": "A2",
+        "id": "p3",
+        "name": "M4 washer",
+        "qty": 150
+      },
+      {
+        "_v": 1,
+        "bin": "B1",
+        "id": "p4",
+        "name": "608 bearing",
+        "qty": 24
+      },
+      {
+        "_v": 1,
+        "bin": "B2",
+        "id": "p5",
+        "name": "GT2 belt, 1 m",
+        "qty": 6
+      },
+      {
+        "_v": 1,
+        "bin": "B2",
+        "id": "p6",
+        "name": "20T pulley",
+        "qty": 12
+      },
+      {
+        "_v": 1,
+        "bin": "C2",
+        "id": "p8",
+        "name": "Limit switch",
+        "qty": 10
+      },
+      {
+        "_v": 1,
+        "bin": "D1",
+        "id": "p9",
+        "name": "2020 extrusion, 500 mm",
+        "qty": 8
+      }
+    ]
+  },
+  "id": "partition-1",
+  "replicas": [
+    "laptop",
+    "phone"
+  ],
+  "steps": [
+    {
+      "at": 1000,
+      "on": "laptop",
+      "seed": [
+        {
+          "bin": "A1",
+          "id": "p1",
+          "name": "M3 socket screw",
+          "qty": 200
+        },
+        {
+          "bin": "A1",
+          "id": "p2",
+          "name": "M3 hex nut",
+          "qty": 340
+        },
+        {
+          "bin": "A2",
+          "id": "p3",
+          "name": "M4 washer",
+          "qty": 150
+        },
+        {
+          "bin": "B1",
+          "id": "p4",
+          "name": "608 bearing",
+          "qty": 24
+        },
+        {
+          "bin": "B2",
+          "id": "p5",
+          "name": "GT2 belt, 1 m",
+          "qty": 6
+        },
+        {
+          "bin": "B2",
+          "id": "p6",
+          "name": "20T pulley",
+          "qty": 12
+        },
+        {
+          "bin": "C1",
+          "id": "p7",
+          "name": "NEMA 17 motor",
+          "qty": 4
+        },
+        {
+          "bin": "C2",
+          "id": "p8",
+          "name": "Limit switch",
+          "qty": 10
+        },
+        {
+          "bin": "D1",
+          "id": "p9",
+          "name": "2020 extrusion, 500 mm",
+          "qty": 8
+        },
+        {
+          "bin": "A3",
+          "id": "p10",
+          "name": "T-nut M5",
+          "qty": 120
+        },
+        {
+          "bin": "D2",
+          "id": "p11",
+          "name": "Shaft, 8 mm",
+          "qty": 5
+        },
+        {
+          "bin": "A4",
+          "id": "p12",
+          "name": "M6 bolt",
+          "qty": 60
+        }
+      ]
+    },
+    {
+      "do": "cut"
+    },
+    {
+      "at": 2000,
+      "fields": {
+        "qty": 40
+      },
+      "on": "laptop",
+      "set": "p12"
+    },
+    {
+      "at": 2003,
+      "fields": {
+        "name": "M6 bolt, zinc plated"
+      },
+      "on": "phone",
+      "set": "p12"
+    },
+    {
+      "at": 2010,
+      "delete": "p7",
+      "on": "laptop"
+    },
+    {
+      "at": 2020,
+      "fields": {
+        "qty": 9
+      },
+      "on": "phone",
+      "set": "p7"
+    },
+    {
+      "do": "plug"
+    }
+  ],
+  "story": "A laptop and a phone share the parts list. The cable is pulled. The laptop changes the quantity of part 12 and the phone renames it; the laptop deletes part 7 and the phone edits it. The cable goes back in.",
+  "title": "The story: quantity against rename on part 12, delete against edit on part 7"
+}

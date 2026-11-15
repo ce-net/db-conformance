@@ -1,0 +1,275 @@
+{
+  "clock": {
+    "laptop": 1000,
+    "phone": 1000
+  },
+  "conformance": "db-conformance M3",
+  "expect": {
+    "gone": [],
+    "hash": "5b92fef13c51bd6bde73e73c61d04a8a7fc7053dceb2f014d6600d574275b24f",
+    "log_len": {
+      "laptop": 16,
+      "phone": 16
+    },
+    "plugs": [
+      {
+        "changed": {
+          "laptop": {
+            "added": [],
+            "changed": {
+              "p5": {
+                "qty": 5
+              },
+              "p6": {
+                "qty": 11
+              }
+            },
+            "removed": []
+          },
+          "phone": {
+            "added": [],
+            "changed": {},
+            "removed": []
+          }
+        },
+        "resolutions": [
+          {
+            "field": "qty",
+            "key": "p6",
+            "lost": [
+              {
+                "by": "laptop",
+                "hlc": "10000.1.laptop",
+                "value": 13
+              }
+            ],
+            "rule": "same millisecond, higher counter",
+            "winner": {
+              "by": "phone",
+              "hlc": "10000.3.phone",
+              "value": 11
+            }
+          }
+        ]
+      }
+    ],
+    "refused": [],
+    "rows": [
+      {
+        "_v": 1,
+        "bin": "A1",
+        "id": "p1",
+        "name": "M3 socket screw",
+        "qty": 200
+      },
+      {
+        "_v": 1,
+        "bin": "A3",
+        "id": "p10",
+        "name": "T-nut M5",
+        "qty": 120
+      },
+      {
+        "_v": 1,
+        "bin": "D2",
+        "id": "p11",
+        "name": "Shaft, 8 mm",
+        "qty": 5
+      },
+      {
+        "_v": 1,
+        "bin": "A4",
+        "id": "p12",
+        "name": "M6 bolt",
+        "qty": 60
+      },
+      {
+        "_v": 1,
+        "bin": "A1",
+        "id": "p2",
+        "name": "M3 hex nut",
+        "qty": 340
+      },
+      {
+        "_v": 1,
+        "bin": "A2",
+        "id": "p3",
+        "name": "M4 washer",
+        "qty": 150
+      },
+      {
+        "_v": 1,
+        "bin": "B1",
+        "id": "p4",
+        "name": "608 bearing",
+        "qty": 24
+      },
+      {
+        "_v": 1,
+        "bin": "B2",
+        "id": "p5",
+        "name": "GT2 belt, 1 m",
+        "qty": 5
+      },
+      {
+        "_v": 1,
+        "bin": "B2",
+        "id": "p6",
+        "name": "20T pulley",
+        "qty": 11
+      },
+      {
+        "_v": 1,
+        "bin": "C1",
+        "id": "p7",
+        "name": "NEMA 17 motor",
+        "qty": 4
+      },
+      {
+        "_v": 1,
+        "bin": "C2",
+        "id": "p8",
+        "name": "Limit switch",
+        "qty": 10
+      },
+      {
+        "_v": 1,
+        "bin": "D1",
+        "id": "p9",
+        "name": "2020 extrusion, 500 mm",
+        "qty": 8
+      }
+    ]
+  },
+  "id": "partition-3",
+  "replicas": [
+    "laptop",
+    "phone"
+  ],
+  "steps": [
+    {
+      "at": 1000,
+      "on": "laptop",
+      "seed": [
+        {
+          "bin": "A1",
+          "id": "p1",
+          "name": "M3 socket screw",
+          "qty": 200
+        },
+        {
+          "bin": "A1",
+          "id": "p2",
+          "name": "M3 hex nut",
+          "qty": 340
+        },
+        {
+          "bin": "A2",
+          "id": "p3",
+          "name": "M4 washer",
+          "qty": 150
+        },
+        {
+          "bin": "B1",
+          "id": "p4",
+          "name": "608 bearing",
+          "qty": 24
+        },
+        {
+          "bin": "B2",
+          "id": "p5",
+          "name": "GT2 belt, 1 m",
+          "qty": 6
+        },
+        {
+          "bin": "B2",
+          "id": "p6",
+          "name": "20T pulley",
+          "qty": 12
+        },
+        {
+          "bin": "C1",
+          "id": "p7",
+          "name": "NEMA 17 motor",
+          "qty": 4
+        },
+        {
+          "bin": "C2",
+          "id": "p8",
+          "name": "Limit switch",
+          "qty": 10
+        },
+        {
+          "bin": "D1",
+          "id": "p9",
+          "name": "2020 extrusion, 500 mm",
+          "qty": 8
+        },
+        {
+          "bin": "A3",
+          "id": "p10",
+          "name": "T-nut M5",
+          "qty": 120
+        },
+        {
+          "bin": "D2",
+          "id": "p11",
+          "name": "Shaft, 8 mm",
+          "qty": 5
+        },
+        {
+          "bin": "A4",
+          "id": "p12",
+          "name": "M6 bolt",
+          "qty": 60
+        }
+      ]
+    },
+    {
+      "at": 8000,
+      "do": "clock",
+      "note": "two seconds behind the laptop",
+      "on": "phone"
+    },
+    {
+      "at": 10000,
+      "fields": {
+        "qty": 7
+      },
+      "on": "laptop",
+      "set": "p5"
+    },
+    {
+      "do": "cut"
+    },
+    {
+      "at": 8100,
+      "fields": {
+        "qty": 5
+      },
+      "on": "phone",
+      "set": "p5"
+    },
+    {
+      "at": 8150,
+      "fields": {
+        "qty": 11
+      },
+      "on": "phone",
+      "set": "p6"
+    },
+    {
+      "at": 10000,
+      "fields": {
+        "qty": 13
+      },
+      "on": "laptop",
+      "set": "p6"
+    },
+    {
+      "do": "plug"
+    }
+  ],
+  "story": "The phone's wall clock reads two seconds behind the laptop's. It sees the laptop's write to part 5, then, offline, writes part 5 again. A plain wall clock would let the laptop's older write win; the hybrid clock carries the laptop's time into the phone, so the phone's later edit wins. On part 6 both write in the same millisecond of hybrid time and the counter decides.",
+  "title": "A phone whose clock is two seconds slow: the hybrid clock keeps cause before effect"
+}

@@ -1,0 +1,370 @@
+{
+  "clock": {
+    "laptop": 1000,
+    "phone": 1000
+  },
+  "conformance": "db-conformance M5",
+  "expect": {
+    "gone": [
+      "p14"
+    ],
+    "hash": "71950bdf8db301d993a3f1bf55b0d752131a8453dc388303143521ca4a6bddab",
+    "log_len": {
+      "laptop": 17,
+      "phone": 17
+    },
+    "plugs": [
+      {
+        "changed": {
+          "laptop": {
+            "added": [
+              "p14"
+            ],
+            "changed": {},
+            "removed": []
+          },
+          "phone": {
+            "added": [
+              "p13"
+            ],
+            "changed": {},
+            "removed": []
+          }
+        },
+        "resolutions": []
+      },
+      {
+        "changed": {
+          "laptop": {
+            "added": [],
+            "changed": {
+              "p13": {
+                "qty": 3
+              }
+            },
+            "removed": []
+          },
+          "phone": {
+            "added": [],
+            "changed": {},
+            "removed": [
+              "p14"
+            ]
+          }
+        },
+        "resolutions": [
+          {
+            "field": null,
+            "key": "p14",
+            "lost": [
+              {
+                "by": "phone",
+                "fields": {
+                  "name": "Cable chain, 1.5 m"
+                },
+                "hlc": "31020.0.phone"
+              }
+            ],
+            "rule": "delete beats edit",
+            "winner": {
+              "by": "laptop",
+              "hlc": "31010.0.laptop",
+              "value": "deleted"
+            }
+          }
+        ]
+      }
+    ],
+    "refused": [
+      {
+        "at": 30020,
+        "err": "invalid qty: expected an integer in u32",
+        "on": "phone",
+        "request": "set p1 qty=-3"
+      },
+      {
+        "at": 30030,
+        "err": "invalid name: 44 long, the limit is 40",
+        "on": "laptop",
+        "request": "set p2 name=\"M3 hex nut, nylon insert, stainless steel A2\""
+      },
+      {
+        "at": 32000,
+        "err": "not found: p14 was deleted",
+        "on": "phone",
+        "request": "set p14 qty=2"
+      },
+      {
+        "at": 32010,
+        "err": "not found: p14 was deleted",
+        "on": "laptop",
+        "request": "set p14 bin=\"E2\""
+      }
+    ],
+    "rows": [
+      {
+        "_v": 1,
+        "bin": "A1",
+        "id": "p1",
+        "name": "M3 socket screw",
+        "qty": 200
+      },
+      {
+        "_v": 1,
+        "bin": "A3",
+        "id": "p10",
+        "name": "T-nut M5",
+        "qty": 120
+      },
+      {
+        "_v": 1,
+        "bin": "D2",
+        "id": "p11",
+        "name": "Shaft, 8 mm",
+        "qty": 5
+      },
+      {
+        "_v": 1,
+        "bin": "A4",
+        "id": "p12",
+        "name": "M6 bolt",
+        "qty": 60
+      },
+      {
+        "_v": 1,
+        "bin": "B3",
+        "id": "p13",
+        "name": "Belt tensioner",
+        "qty": 3
+      },
+      {
+        "_v": 1,
+        "bin": "A1",
+        "id": "p2",
+        "name": "M3 hex nut",
+        "qty": 340
+      },
+      {
+        "_v": 1,
+        "bin": "A2",
+        "id": "p3",
+        "name": "M4 washer",
+        "qty": 150
+      },
+      {
+        "_v": 1,
+        "bin": "B1",
+        "id": "p4",
+        "name": "608 bearing",
+        "qty": 24
+      },
+      {
+        "_v": 1,
+        "bin": "B2",
+        "id": "p5",
+        "name": "GT2 belt, 1 m",
+        "qty": 6
+      },
+      {
+        "_v": 1,
+        "bin": "B2",
+        "id": "p6",
+        "name": "20T pulley",
+        "qty": 12
+      },
+      {
+        "_v": 1,
+        "bin": "C1",
+        "id": "p7",
+        "name": "NEMA 17 motor",
+        "qty": 4
+      },
+      {
+        "_v": 1,
+        "bin": "C2",
+        "id": "p8",
+        "name": "Limit switch",
+        "qty": 10
+      },
+      {
+        "_v": 1,
+        "bin": "D1",
+        "id": "p9",
+        "name": "2020 extrusion, 500 mm",
+        "qty": 8
+      }
+    ]
+  },
+  "id": "partition-5",
+  "replicas": [
+    "laptop",
+    "phone"
+  ],
+  "steps": [
+    {
+      "at": 1000,
+      "on": "laptop",
+      "seed": [
+        {
+          "bin": "A1",
+          "id": "p1",
+          "name": "M3 socket screw",
+          "qty": 200
+        },
+        {
+          "bin": "A1",
+          "id": "p2",
+          "name": "M3 hex nut",
+          "qty": 340
+        },
+        {
+          "bin": "A2",
+          "id": "p3",
+          "name": "M4 washer",
+          "qty": 150
+        },
+        {
+          "bin": "B1",
+          "id": "p4",
+          "name": "608 bearing",
+          "qty": 24
+        },
+        {
+          "bin": "B2",
+          "id": "p5",
+          "name": "GT2 belt, 1 m",
+          "qty": 6
+        },
+        {
+          "bin": "B2",
+          "id": "p6",
+          "name": "20T pulley",
+          "qty": 12
+        },
+        {
+          "bin": "C1",
+          "id": "p7",
+          "name": "NEMA 17 motor",
+          "qty": 4
+        },
+        {
+          "bin": "C2",
+          "id": "p8",
+          "name": "Limit switch",
+          "qty": 10
+        },
+        {
+          "bin": "D1",
+          "id": "p9",
+          "name": "2020 extrusion, 500 mm",
+          "qty": 8
+        },
+        {
+          "bin": "A3",
+          "id": "p10",
+          "name": "T-nut M5",
+          "qty": 120
+        },
+        {
+          "bin": "D2",
+          "id": "p11",
+          "name": "Shaft, 8 mm",
+          "qty": 5
+        },
+        {
+          "bin": "A4",
+          "id": "p12",
+          "name": "M6 bolt",
+          "qty": 60
+        }
+      ]
+    },
+    {
+      "do": "cut"
+    },
+    {
+      "at": 30000,
+      "fields": {
+        "bin": "B3",
+        "name": "Belt tensioner",
+        "qty": 2
+      },
+      "on": "laptop",
+      "set": "p13"
+    },
+    {
+      "at": 30010,
+      "fields": {
+        "bin": "E1",
+        "name": "Cable chain, 1 m",
+        "qty": 1
+      },
+      "on": "phone",
+      "set": "p14"
+    },
+    {
+      "at": 30020,
+      "fields": {
+        "qty": -3
+      },
+      "on": "phone",
+      "set": "p1"
+    },
+    {
+      "at": 30030,
+      "fields": {
+        "name": "M3 hex nut, nylon insert, stainless steel A2"
+      },
+      "on": "laptop",
+      "set": "p2"
+    },
+    {
+      "do": "plug"
+    },
+    {
+      "do": "cut"
+    },
+    {
+      "at": 31000,
+      "fields": {
+        "qty": 3
+      },
+      "on": "phone",
+      "set": "p13"
+    },
+    {
+      "at": 31010,
+      "delete": "p14",
+      "on": "laptop"
+    },
+    {
+      "at": 31020,
+      "fields": {
+        "name": "Cable chain, 1.5 m"
+      },
+      "on": "phone",
+      "set": "p14"
+    },
+    {
+      "do": "plug"
+    },
+    {
+      "at": 32000,
+      "fields": {
+        "qty": 2
+      },
+      "on": "phone",
+      "set": "p14"
+    },
+    {
+      "at": 32010,
+      "fields": {
+        "bin": "E2"
+      },
+      "on": "laptop",
+      "set": "p14"
+    }
+  ],
+  "story": "Apart, each side adds a part of its own, and each tries an edit the Part record refuses (a negative quantity, a name over 40 characters); the refused edits never enter the op log. After a merge the cable is pulled again: the phone edits the laptop's new part, the laptop deletes the phone's new part while the phone renames it. After the second merge an edit of the deleted part is refused on both sides.",
+  "title": "Two partitions, new parts on each side, typed edits refused before they reach the log"
+}

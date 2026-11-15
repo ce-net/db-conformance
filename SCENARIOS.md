@@ -29,3 +29,50 @@ run never meets another.
 Known encoding limits, not in the golden values: non-integral floats below 1e-6 or at or above 1e21 (Rust's ryu and
 JavaScript write them differently); JSON numbers above 2^53 in fields a JavaScript reader does not know (they are
 kept as JavaScript numbers).
+
+## M1 to M5: offline merge (db.replica)
+
+Two replicas of one typed collection keep working with no connection and merge when they meet. These scenarios are
+data, not calls to a store: each file in `golden/merge/` holds the scripted steps and the expected result, and a
+language's replica passes when it reproduces `expect` exactly. The reference replicas, Rust and TypeScript, are
+`db.replica` in `repo:demo-offline-merge` (`crates/db-replica`, `ts/src/replica.ts`); its CI runs every file here
+with two Rust processes, Rust and TypeScript processes, and two TypeScript processes, and all three must match.
+
+The record is `Part` (app `offline-merge`, collection `parts`, version 1): `id` (key, string, max 8), `name`
+(string, max 40), `qty` (u32), `bin` (string, max 6). Rows are stored in the D1 canonical encoding.
+
+The rules:
+
+- **Op log.** Every local change is an op `{by, seq, hlc, key, kind: set|delete, fields}` appended to the log;
+  `seq` counts from 1 per origin. A `set` carries only the fields it writes, in their canonical encoding (an insert
+  writes all of them). A local edit is checked against the record first (decode, then the `max` bounds); a refused
+  edit gets ce-db's error text (`invalid qty: expected an integer in u32`, `invalid name: 44 long, the limit is
+  40`) and never enters the log. An edit of a deleted key is refused with `not found: <key> was deleted`.
+- **Hybrid logical clock.** `hlc = {w, c, n}`: physical ms, counter, node name, ordered by all three (the name by
+  bytes). Local event at physical time pt: if pt > w then (pt, 0) else (w, c+1). Receiving an op with clock m at pt:
+  w' = max(w, m.w, pt); c' = max(c, m.c)+1 if w' equals both w and m.w, c+1 if only w, m.c+1 if only m.w, else 0.
+  A replica applies the clock receive once per op it takes, in (origin, seq) order.
+- **Sync.** A replica sends its version vector `{node: highest seq seen}`; the peer answers with every op the vector
+  lacks. Ops are taken in seq order per origin; a gap waits for a resend. Nothing is queued while apart.
+- **Merge.** The state is a function of the set of ops: a key with any `delete` op is gone, whatever the clocks
+  (delete beats edit, and stays gone); otherwise each field takes the value of the `set` with the highest hlc that
+  wrote it (field-level last-writer-wins).
+- **State hash.** SHA-256, lowercase hex, over `key<TAB>row<LF>` for every live row (the row's canonical text), then
+  `-<TAB>key<LF>` for every deleted key, both sorted by key bytes.
+- **Resolutions.** At each plug-in, for every key both sides touched while apart: a delete gives one entry (rule
+  `delete beats edit`, or `both deleted it`) listing the edits it overrode; otherwise one entry per field, `later
+  hybrid clock`, `same millisecond, higher counter`, `same clock reading, node name breaks the tie`, or `only one
+  side wrote this field: both edits kept`.
+
+Scenario steps: `clock` (initial physical clock per replica), then `{at, on, seed|set|delete}` (the replica's
+physical clock becomes `at`), `{do: cut}`, `{do: plug}`, `{do: clock, on, at}`. While plugged in, the replicas sync
+to the same version vector after every step. `expect` holds the hash, the rows, the deleted keys, per plug-in the
+resolutions and each side's row diff (ce-db's `diff`), the refused edits and each log's length.
+
+| id | file | checks | golden hash |
+|---|---|---|---|
+| M1 story | `golden/merge/partition-1.json` | apart, one side changes `qty` of p12 and the other renames it (both kept); one deletes p7 and the other edits it (deleted) | `2891c5de7869e5f5` |
+| M2 same-field | `golden/merge/partition-2.json` | both change `qty` of p3 and p4: the later hlc wins per field, and p3 keeps the other side's `bin` | `68153f90ba85ed2e` |
+| M3 slow-clock | `golden/merge/partition-3.json` | the phone's clock is 2 s behind; its edit after seeing the laptop's write carries the laptop's time and wins; a same-millisecond write is decided by the counter | `5b92fef13c51bd6b` |
+| M4 ties-and-deletes | `golden/merge/partition-4.json` | equal (w, c) on both sides: the node name decides; both delete p9; a delete beats two edits of p10 | `bff13b80f1699d89` |
+| M5 two-partitions | `golden/merge/partition-5.json` | new parts on each side, two refused typed edits not in the log, a second partition with delete against rename, edits of the deleted part refused on both sides | `71950bdf8db301d9` |

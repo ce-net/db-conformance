@@ -1,0 +1,309 @@
+{
+  "clock": {
+    "laptop": 1000,
+    "phone": 1000
+  },
+  "conformance": "db-conformance M4",
+  "expect": {
+    "gone": [
+      "p10",
+      "p9"
+    ],
+    "hash": "bff13b80f1699d89e8d2cba97ce4fa6f0d0cf57598123b76df0edb66b8a0ea29",
+    "log_len": {
+      "laptop": 19,
+      "phone": 19
+    },
+    "plugs": [
+      {
+        "changed": {
+          "laptop": {
+            "added": [],
+            "changed": {
+              "p8": {
+                "name": "Limit switch, NC"
+              }
+            },
+            "removed": []
+          },
+          "phone": {
+            "added": [],
+            "changed": {},
+            "removed": [
+              "p10"
+            ]
+          }
+        },
+        "resolutions": [
+          {
+            "field": null,
+            "key": "p10",
+            "lost": [
+              {
+                "by": "phone",
+                "fields": {
+                  "qty": 100
+                },
+                "hlc": "20040.0.phone"
+              },
+              {
+                "by": "phone",
+                "fields": {
+                  "bin": "A5"
+                },
+                "hlc": "20050.0.phone"
+              }
+            ],
+            "rule": "delete beats edit",
+            "winner": {
+              "by": "laptop",
+              "hlc": "20030.0.laptop",
+              "value": "deleted"
+            }
+          },
+          {
+            "field": "name",
+            "key": "p8",
+            "lost": [
+              {
+                "by": "laptop",
+                "hlc": "20000.0.laptop",
+                "value": "Limit switch, roller"
+              }
+            ],
+            "rule": "same clock reading, node name breaks the tie",
+            "winner": {
+              "by": "phone",
+              "hlc": "20000.0.phone",
+              "value": "Limit switch, NC"
+            }
+          },
+          {
+            "field": null,
+            "key": "p9",
+            "lost": [],
+            "rule": "both deleted it",
+            "winner": {
+              "by": "laptop+phone",
+              "hlc": "20010.0.laptop",
+              "value": "deleted"
+            }
+          }
+        ]
+      }
+    ],
+    "refused": [],
+    "rows": [
+      {
+        "_v": 1,
+        "bin": "A1",
+        "id": "p1",
+        "name": "M3 socket screw",
+        "qty": 200
+      },
+      {
+        "_v": 1,
+        "bin": "D2",
+        "id": "p11",
+        "name": "Shaft, 8 mm",
+        "qty": 5
+      },
+      {
+        "_v": 1,
+        "bin": "A4",
+        "id": "p12",
+        "name": "M6 bolt",
+        "qty": 60
+      },
+      {
+        "_v": 1,
+        "bin": "A1",
+        "id": "p2",
+        "name": "M3 hex nut",
+        "qty": 340
+      },
+      {
+        "_v": 1,
+        "bin": "A2",
+        "id": "p3",
+        "name": "M4 washer",
+        "qty": 150
+      },
+      {
+        "_v": 1,
+        "bin": "B1",
+        "id": "p4",
+        "name": "608 bearing",
+        "qty": 24
+      },
+      {
+        "_v": 1,
+        "bin": "B2",
+        "id": "p5",
+        "name": "GT2 belt, 1 m",
+        "qty": 6
+      },
+      {
+        "_v": 1,
+        "bin": "B2",
+        "id": "p6",
+        "name": "20T pulley",
+        "qty": 12
+      },
+      {
+        "_v": 1,
+        "bin": "C1",
+        "id": "p7",
+        "name": "NEMA 17 motor",
+        "qty": 4
+      },
+      {
+        "_v": 1,
+        "bin": "C2",
+        "id": "p8",
+        "name": "Limit switch, NC",
+        "qty": 10
+      }
+    ]
+  },
+  "id": "partition-4",
+  "replicas": [
+    "laptop",
+    "phone"
+  ],
+  "steps": [
+    {
+      "at": 1000,
+      "on": "laptop",
+      "seed": [
+        {
+          "bin": "A1",
+          "id": "p1",
+          "name": "M3 socket screw",
+          "qty": 200
+        },
+        {
+          "bin": "A1",
+          "id": "p2",
+          "name": "M3 hex nut",
+          "qty": 340
+        },
+        {
+          "bin": "A2",
+          "id": "p3",
+          "name": "M4 washer",
+          "qty": 150
+        },
+        {
+          "bin": "B1",
+          "id": "p4",
+          "name": "608 bearing",
+          "qty": 24
+        },
+        {
+          "bin": "B2",
+          "id": "p5",
+          "name": "GT2 belt, 1 m",
+          "qty": 6
+        },
+        {
+          "bin": "B2",
+          "id": "p6",
+          "name": "20T pulley",
+          "qty": 12
+        },
+        {
+          "bin": "C1",
+          "id": "p7",
+          "name": "NEMA 17 motor",
+          "qty": 4
+        },
+        {
+          "bin": "C2",
+          "id": "p8",
+          "name": "Limit switch",
+          "qty": 10
+        },
+        {
+          "bin": "D1",
+          "id": "p9",
+          "name": "2020 extrusion, 500 mm",
+          "qty": 8
+        },
+        {
+          "bin": "A3",
+          "id": "p10",
+          "name": "T-nut M5",
+          "qty": 120
+        },
+        {
+          "bin": "D2",
+          "id": "p11",
+          "name": "Shaft, 8 mm",
+          "qty": 5
+        },
+        {
+          "bin": "A4",
+          "id": "p12",
+          "name": "M6 bolt",
+          "qty": 60
+        }
+      ]
+    },
+    {
+      "do": "cut"
+    },
+    {
+      "at": 20000,
+      "fields": {
+        "name": "Limit switch, roller"
+      },
+      "on": "laptop",
+      "set": "p8"
+    },
+    {
+      "at": 20000,
+      "fields": {
+        "name": "Limit switch, NC"
+      },
+      "on": "phone",
+      "set": "p8"
+    },
+    {
+      "at": 20010,
+      "delete": "p9",
+      "on": "laptop"
+    },
+    {
+      "at": 20020,
+      "delete": "p9",
+      "on": "phone"
+    },
+    {
+      "at": 20030,
+      "delete": "p10",
+      "on": "laptop"
+    },
+    {
+      "at": 20040,
+      "fields": {
+        "qty": 100
+      },
+      "on": "phone",
+      "set": "p10"
+    },
+    {
+      "at": 20050,
+      "fields": {
+        "bin": "A5"
+      },
+      "on": "phone",
+      "set": "p10"
+    },
+    {
+      "do": "plug"
+    }
+  ],
+  "story": "Both sides rename part 8 at the same millisecond with the same counter: the node name breaks the tie, the same way on both. Both delete part 9. The laptop deletes part 10 while the phone edits it twice; both edits are lost to the delete.",
+  "title": "Same instant on both sides, both delete, delete against two edits"
+}

@@ -1,0 +1,309 @@
+{
+  "clock": {
+    "laptop": 1000,
+    "phone": 1000
+  },
+  "conformance": "db-conformance M2",
+  "expect": {
+    "gone": [],
+    "hash": "68153f90ba85ed2ea7001862c0683375d770963261ab7d98cf226ac1a2f41ac1",
+    "log_len": {
+      "laptop": 17,
+      "phone": 17
+    },
+    "plugs": [
+      {
+        "changed": {
+          "laptop": {
+            "added": [],
+            "changed": {
+              "p3": {
+                "qty": 90
+              }
+            },
+            "removed": []
+          },
+          "phone": {
+            "added": [],
+            "changed": {
+              "p3": {
+                "bin": "A9"
+              },
+              "p4": {
+                "qty": 22
+              }
+            },
+            "removed": []
+          }
+        },
+        "resolutions": [
+          {
+            "field": "bin",
+            "key": "p3",
+            "lost": [],
+            "rule": "only one side wrote this field: both edits kept",
+            "winner": {
+              "by": "laptop",
+              "hlc": "3500.0.laptop",
+              "value": "A9"
+            }
+          },
+          {
+            "field": "qty",
+            "key": "p3",
+            "lost": [
+              {
+                "by": "laptop",
+                "hlc": "3000.0.laptop",
+                "value": 140
+              }
+            ],
+            "rule": "later hybrid clock",
+            "winner": {
+              "by": "phone",
+              "hlc": "3400.0.phone",
+              "value": 90
+            }
+          },
+          {
+            "field": "qty",
+            "key": "p4",
+            "lost": [
+              {
+                "by": "phone",
+                "hlc": "3100.0.phone",
+                "value": 20
+              }
+            ],
+            "rule": "later hybrid clock",
+            "winner": {
+              "by": "laptop",
+              "hlc": "3200.0.laptop",
+              "value": 22
+            }
+          }
+        ]
+      }
+    ],
+    "refused": [],
+    "rows": [
+      {
+        "_v": 1,
+        "bin": "A1",
+        "id": "p1",
+        "name": "M3 socket screw",
+        "qty": 200
+      },
+      {
+        "_v": 1,
+        "bin": "A3",
+        "id": "p10",
+        "name": "T-nut M5",
+        "qty": 120
+      },
+      {
+        "_v": 1,
+        "bin": "D2",
+        "id": "p11",
+        "name": "Shaft, 8 mm",
+        "qty": 5
+      },
+      {
+        "_v": 1,
+        "bin": "A4",
+        "id": "p12",
+        "name": "M6 bolt",
+        "qty": 60
+      },
+      {
+        "_v": 1,
+        "bin": "A1",
+        "id": "p2",
+        "name": "M3 hex nut",
+        "qty": 340
+      },
+      {
+        "_v": 1,
+        "bin": "A9",
+        "id": "p3",
+        "name": "M4 washer",
+        "qty": 90
+      },
+      {
+        "_v": 1,
+        "bin": "B1",
+        "id": "p4",
+        "name": "608 bearing",
+        "qty": 22
+      },
+      {
+        "_v": 1,
+        "bin": "B2",
+        "id": "p5",
+        "name": "GT2 belt, 1 m",
+        "qty": 6
+      },
+      {
+        "_v": 1,
+        "bin": "B2",
+        "id": "p6",
+        "name": "20T pulley",
+        "qty": 12
+      },
+      {
+        "_v": 1,
+        "bin": "C1",
+        "id": "p7",
+        "name": "NEMA 17 motor",
+        "qty": 4
+      },
+      {
+        "_v": 1,
+        "bin": "C2",
+        "id": "p8",
+        "name": "Limit switch",
+        "qty": 10
+      },
+      {
+        "_v": 1,
+        "bin": "D1",
+        "id": "p9",
+        "name": "2020 extrusion, 500 mm",
+        "qty": 8
+      }
+    ]
+  },
+  "id": "partition-2",
+  "replicas": [
+    "laptop",
+    "phone"
+  ],
+  "steps": [
+    {
+      "at": 1000,
+      "on": "laptop",
+      "seed": [
+        {
+          "bin": "A1",
+          "id": "p1",
+          "name": "M3 socket screw",
+          "qty": 200
+        },
+        {
+          "bin": "A1",
+          "id": "p2",
+          "name": "M3 hex nut",
+          "qty": 340
+        },
+        {
+          "bin": "A2",
+          "id": "p3",
+          "name": "M4 washer",
+          "qty": 150
+        },
+        {
+          "bin": "B1",
+          "id": "p4",
+          "name": "608 bearing",
+          "qty": 24
+        },
+        {
+          "bin": "B2",
+          "id": "p5",
+          "name": "GT2 belt, 1 m",
+          "qty": 6
+        },
+        {
+          "bin": "B2",
+          "id": "p6",
+          "name": "20T pulley",
+          "qty": 12
+        },
+        {
+          "bin": "C1",
+          "id": "p7",
+          "name": "NEMA 17 motor",
+          "qty": 4
+        },
+        {
+          "bin": "C2",
+          "id": "p8",
+          "name": "Limit switch",
+          "qty": 10
+        },
+        {
+          "bin": "D1",
+          "id": "p9",
+          "name": "2020 extrusion, 500 mm",
+          "qty": 8
+        },
+        {
+          "bin": "A3",
+          "id": "p10",
+          "name": "T-nut M5",
+          "qty": 120
+        },
+        {
+          "bin": "D2",
+          "id": "p11",
+          "name": "Shaft, 8 mm",
+          "qty": 5
+        },
+        {
+          "bin": "A4",
+          "id": "p12",
+          "name": "M6 bolt",
+          "qty": 60
+        }
+      ]
+    },
+    {
+      "do": "cut"
+    },
+    {
+      "at": 3000,
+      "fields": {
+        "qty": 140
+      },
+      "on": "laptop",
+      "set": "p3"
+    },
+    {
+      "at": 3100,
+      "fields": {
+        "qty": 20
+      },
+      "on": "phone",
+      "set": "p4"
+    },
+    {
+      "at": 3200,
+      "fields": {
+        "qty": 22
+      },
+      "on": "laptop",
+      "set": "p4"
+    },
+    {
+      "at": 3400,
+      "fields": {
+        "qty": 90
+      },
+      "on": "phone",
+      "set": "p3"
+    },
+    {
+      "at": 3500,
+      "fields": {
+        "bin": "A9"
+      },
+      "on": "laptop",
+      "set": "p3"
+    },
+    {
+      "do": "plug"
+    }
+  ],
+  "story": "Both sides change the quantity of part 3 and of part 4 while apart; the laptop also moves part 3 to another bin. Each field is decided on its own: part 3 takes the phone's quantity and the laptop's bin.",
+  "title": "The same field on both sides: the later hybrid clock wins, field by field"
+}

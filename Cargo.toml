@@ -3,6 +3,6 @@ resolver = "2"
 members = ["schema", "runners/rs", "driver"]
 
 [workspace.dependencies]
-ce-db = { git = "https://github.com/Leif-Rydenfalk/ce-db-rs", rev = "d900da1ac888" }
-ce-db-core = { git = "https://github.com/Leif-Rydenfalk/ce-db-rs", rev = "d900da1ac888" }
-ce-db-dev = { git = "https://github.com/Leif-Rydenfalk/ce-db-rs", rev = "d900da1ac888" }
+ce-db = { git = "https://github.com/ce-net/ce-db-rs", rev = "0214550eb551a4df0a035a664b5eb668145b625a" }
+ce-db-core = { git = "https://github.com/ce-net/ce-db-rs", rev = "0214550eb551a4df0a035a664b5eb668145b625a" }
+ce-db-dev = { git = "https://github.com/ce-net/ce-db-rs", rev = "0214550eb551a4df0a035a664b5eb668145b625a" }

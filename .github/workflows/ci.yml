@@ -1,9 +1,11 @@
-# Manual only (Leif 2026-10-14 00:12 CEST: "We have used 90% of our actions on GitHub"): run it with
-# `gh workflow run test -R Leif-Rydenfalk/db-conformance`. Private git deps (ce-db-rs, ce-db-ts, rust-stack,
-# state-store-cell) are read with the deploy keys in secret CE_DEPLOY_KEYS, one per private dep repo.
-name: test
+name: ci
 on:
+  push:
+    branches: [main]
+  pull_request:
   workflow_dispatch:
+permissions:
+  contents: read
 jobs:
   conformance:
     runs-on: ubuntu-latest
@@ -21,7 +23,6 @@ jobs:
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.CE_DEPLOY_KEYS }}
-      - run: git config --global url."ssh://git@github.com/".insteadOf "https://github.com/"
       - run: npm ci && npm run build
       - run: cargo build
       - name: D1..D13, D8 both ways (dev stores; D11 kills and restarts one)

@@ -2,6 +2,7 @@
 name = "conf-rs"
 version = "0.1.0"
 edition = "2021"
+license = "Apache-2.0"
 description = "db-conformance runner for ce-db-rs: drives only the public ce-db API, prints CONF <id> PASS|FAIL"
 
 [dependencies]

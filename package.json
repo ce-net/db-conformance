@@ -1,13 +1,14 @@
 {
   "name": "db-conformance-ts",
   "private": true,
+  "license": "Apache-2.0",
   "type": "module",
   "description": "The TypeScript runner of db-conformance (ce-db-ts)",
   "scripts": {
     "build": "tsc -p tsconfig.json"
   },
   "dependencies": {
-    "@ce-net/db": "git+https://github.com/Leif-Rydenfalk/ce-db-ts.git#662859d21080f28367e30a8cced9708131b89552"
+    "@ce-net/db": "git+https://github.com/ce-net/ce-db-ts.git#096910e90a2d429ad823b7fcf3dcbcb3008de45f"
   },
   "devDependencies": {
     "@types/node": "18.19.130",

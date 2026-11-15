@@ -35,12 +35,20 @@ ts     PASS PASS PASS PASS PASS PASS PASS PASS PASS PASS PASS PASS PASS
 | `runners/rs/` | `conf-rs` on `ce-db` |
 | `runners/ts/run.ts` | the TypeScript runner on `@ce-net/db` |
 | `driver/` | `db-conformance`: starts dev stores, runs each runner, D8 across languages, D11 (kill and restart a dev store child, `db-conformance dev-store`), prints the matrix |
-| `.github/workflows/ci.yml` | manual CI: the matrix on dev stores, and the generated files checked for drift |
+| `.github/workflows/ci.yml` | CI on every push and pull request: the matrix on dev stores, and the generated files checked for drift |
 
-The live run against a real replica needs an app of its own: `repo:state-store-cell/AGENTS.md` allows live tests on
-`repl-probe/ping` only, so the store's owner must grant `db-conformance` first. Requested 2026-11-14 through
-cap.request (`req-5fefb9289b0cf55c` for db-conformance, `req-6ee50259a81d4099` for parts-demo, the D13 other app);
-cap.review answered Escalate (write rights), so the state-store-cell owner (the maintainers) or Leif decides. Four
-caps of the app are used: full (`state.dbconformance.*`), `items.read`, `items.read`+`items.write`, and the
-parts-demo grant as `--cap-other`. D11 never runs on `--store`: it kills a dev store. Until the grants exist the kit
-runs against ce-db-dev, which speaks the same wire and schema hash as state.store and copies the engine's rules.
+The live run against a real replica needs a granted app of its own (four caps: full `state.dbconformance.*`,
+`items.read`, `items.read`+`items.write`, and another app's grant as `--cap-other`). D11 never runs on `--store`:
+it kills a dev store. Without grants the kit runs against ce-db-dev, which speaks the same wire and schema hash as
+state.store and copies the engine's rules.
+
+Dependencies not yet public: the ce-db SDKs build on the ce-net wire crates, which are not open yet (see the
+ce-db-rs README); CI reads them with read-only deploy keys.
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## License
+
+Licensed under the Apache License, Version 2.0 ([LICENSE](LICENSE)). See [NOTICE](NOTICE).
